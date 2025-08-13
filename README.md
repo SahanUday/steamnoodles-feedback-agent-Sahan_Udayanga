@@ -39,10 +39,12 @@ The architecture uses Flask for the backend API services and Streamlit for the i
 ### High-Level System Architecture
 ```mermaid
 graph TD
-    A[Streamlit Frontend] <--> B[Flask API Backend]
+    A[Dashboard] <--> B[Response Agent]
     B <--> C[Google Gemini AI Model]
-    A --> D[Dashboard Visualizations]
+    A <--> D[Visualization Agent]
     B --> E[CSV Storage - Feedback Dataset]
+    E --> D
+    D <--> C
     style A fill:#97CBFF,stroke:#333,stroke-width:2px
     style B fill:#FFA69E,stroke:#333,stroke-width:2px
     style C fill:#B8F2E6,stroke:#333,stroke-width:2px
@@ -210,7 +212,7 @@ The Sentiment Dashboard Agent provides comprehensive visualization and analysis 
 5. Filter by feedback category to see specific feedback examples
 6. Generate AI-powered summary reports
 
-## 📊 Demo Output
+## 📊 Visualizing Dashboard
 
 ### Time Period Selection
 ![Time Range Selection](./assets/time_range_selecting.jpg)
@@ -254,17 +256,5 @@ This feature allows management to focus on specific aspects of the business that
 
 The system can generate comprehensive summaries of customer sentiment for any selected time period, highlighting key trends, successes, and areas for improvement.
 
-## 🎯 Evaluation Criteria
-
-| Criteria | Weight | Description |
-|----------|--------|-------------|
-| Functionality of both agents | 40% | Both the Feedback Analysis Agent and Sentiment Dashboard Agent function as intended, providing accurate analysis, responses, and visualizations |
-| Use of LLMs + Sentiment logic | 25% | Effective implementation of Google's Gemini model for sentiment analysis, classification, and response generation with appropriate prompting strategies |
-| Code quality & documentation | 20% | Clean, modular code with proper error handling, comments, and comprehensive documentation |
-| Innovation & improvements | 15% | Added features like multilingual support, detailed categorization, and comprehensive visualization options |
-
-## 🎬 Demo Video
-[SteamNoodles Feedback Agent System Demo](./assets/Turn%20on%20blue%20LED.mp4)
-
 ## 📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
