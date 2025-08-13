@@ -1,103 +1,185 @@
-from langchain_google_genai import GoogleGenerativeAI
-from langchain.prompts import PromptTemplate
-from dotenv import load_dotenv
-import os
-import csv
-from datetime import datetime
+import streamlit as st
+import pandas as pd
+import requests
+import plotly.express as px
+from datetime import datetime, timedelta
 
-# Load API key
-load_dotenv()
-api_key = os.getenv("GOOGLE_API_KEY")
+st.set_page_config(page_title="SteamNoodles Feedback Agents", page_icon="🍜", layout="wide")
 
-# Initialize Gemini
-llm = GoogleGenerativeAI(model="gemini-1.5-flash", google_api_key=api_key)
+# ---- Sidebar Navigation with Buttons ----
+st.sidebar.title("🍜 SteamNoodles")
 
-# PROMPT 1: Feedback analysis (for analytics only)
-analysis_prompt = PromptTemplate.from_template(
-    """
-You are a feedback analysis assistant.
+if 'page' not in st.session_state:
+    st.session_state.page = "📨 Feedback Agent"
 
-Analyze the following feedback and provide:
-1. Fine-grained sentiment (Very Negative / Negative / Neutral / Positive / Very Positive)
-2. Urgency level (Low / Medium / High)
-3. Dominant customer emotion (anger, joy, frustration, gratitude, disappointment, etc.)
+if st.sidebar.button("📨 Feedback Agent"):
+    st.session_state.page = "📨 Feedback Agent"
+if st.sidebar.button("📊 Sentiment Dashboard"):
+    st.session_state.page = "📊 Sentiment Dashboard"
 
-Only return your answer in this exact format:
-Sentiment: <sentiment>
-Urgency: <urgency>
-Emotion: <emotion>
+page = st.session_state.page
 
-Feedback:
-"{feedback}"
-"""
-)
+# ---- Agent 1: Feedback Analyzer ----
+if page == "📨 Feedback Agent":
+    st.title("📨 Feedback Agent")
+    st.markdown("##### Enter customer feedback.")
+    with st.form("feedback_form"):
+        feedback = st.text_area("📝 Customer Feedback", height=150)
+        submitted = st.form_submit_button(" Submit ")
 
-# PROMPT 2: Human-like response generation
-response_prompt = PromptTemplate.from_template(
-    """
-You are a polite and emotionally intelligent automated customer support responder for automatically responding to customer reviews.
-Given the customer's feedback, sentiment, urgency, and emotion,
-write a short, natural, context-aware and kind reply. Adapt the tone to match the emotion and urgency.
+    if submitted and feedback:
+        with st.spinner("Please wait...."):
+            try:
+                res = requests.post("http://localhost:5000/analyze_feedback", json={"feedback": feedback})
+                data = res.json()
+                if "reply" in data:
+                    st.success("✅ Feedback processed successfully!")
+                    st.markdown("### 💬 Auto-Generated Response")
+                    st.markdown(data['reply'].replace("\n", "  \n"))
+                elif "error" in data:
+                    st.error(f"❌ Request failed: {data['error']}")
+                else:
+                    st.error("❌ Unexpected response from server.")
+            except Exception as e:
+                st.error(f"❌ Request failed: {e}")
 
-Feedback: "{feedback}"
-Sentiment: {sentiment}
-Urgency: {urgency}
-Emotion: {emotion}
+# ---- Agent 2: Sentiment Visualization ----
+elif page == "📊 Sentiment Dashboard":
+    st.title("📊 Sentiment Trend Dashboard")
 
-Reply:
-"""
-)
+    df = pd.read_csv("steamnoodles_feedback_dataset.csv")
+    df["timestamp"] = pd.to_datetime(df["timestamp"])
 
-# CSV log file
-CSV_FILE = "feedback_log.csv"
+    today = datetime.today().date()
 
-# Save all to CSV
-def save_to_csv(feedback, sentiment, urgency, emotion, reply, filename=CSV_FILE):
-    file_exists = os.path.isfile(filename)
-    with open(filename, mode="a", newline="", encoding="utf-8") as f:
-        writer = csv.writer(f)
-        if not file_exists:
-            writer.writerow(["timestamp", "feedback", "sentiment", "urgency", "emotion", "reply"])
-        writer.writerow([datetime.now().isoformat(), feedback, sentiment, urgency, emotion, reply])
+    range_option = st.selectbox(
+        "Select time range",
+        options=["Last 7 Days", "Last 30 Days", "Custom Range"],
+        index=0
+    )
 
-# Main logic
-def main():
-    print("📨 Feedback Agent (type 'exit' to quit)\n")
-    while True:
-        feedback = input("Enter customer feedback:\n> ").strip()
-        if feedback.lower() == "exit":
-            print("👋 Exiting.")
-            break
+    if range_option == "Last 7 Days":
+        start_date = today - timedelta(days=7)
+        end_date = today
+    elif range_option == "Last 30 Days":
+        start_date = today - timedelta(days=30)
+        end_date = today
+    else:
+        start_date = st.date_input("Start date", today - timedelta(days=7))
+        end_date = st.date_input("End date", today)
 
-        # Step 1: Analyze feedback
-        analysis_query = analysis_prompt.format(feedback=feedback)
-        analysis_result = llm.invoke(analysis_query).strip()
+    if start_date > end_date:
+        st.error("❌ Start date must be before or equal to end date.")
+        st.stop()
 
-        try:
-            sentiment = analysis_result.split("Sentiment:")[1].split("\n")[0].strip()
-            urgency = analysis_result.split("Urgency:")[1].split("\n")[0].strip()
-            emotion = analysis_result.split("Emotion:")[1].strip()
-        except Exception as e:
-            print("❌ Error parsing analysis result:", e)
-            print("Raw output:\n", analysis_result)
-            continue
+    mask = (df["timestamp"].dt.date >= start_date) & (df["timestamp"].dt.date <= end_date)
+    filtered_df = df.loc[mask]
 
-        # Step 2: Generate response
-        response_query = response_prompt.format(
-            feedback=feedback,
-            sentiment=sentiment,
-            urgency=urgency,
-            emotion=emotion
-        )
-        reply = llm.invoke(response_query).strip()
+    if filtered_df.empty:
+        st.info("No feedback entries found in this range.")
+    else:
+        trend_df = filtered_df.groupby([filtered_df["timestamp"].dt.date, "sentiment"]).size().reset_index(name="count")
+        trend_df.columns = ["date", "sentiment", "count"]
 
-        # Step 3: Print and save
-        print(f"\n🔍 Sentiment: {sentiment}")
-        print(f"⚡ Urgency: {urgency}")
-        print(f"🎭 Emotion: {emotion}")
-        print(f"💬 Reply: {reply}\n")
-        save_to_csv(feedback, sentiment, urgency, emotion, reply)
-        print("✅ Saved to feedback_log.csv\n" + "-"*50)
+        st.markdown("## 👆 Select Visualization Type")
+        col1, col2 = st.columns(2)
+        with col1:
+            show_trend = st.button("📈 Show Trend Plot")
+        with col2:
+            show_pie = st.button("🥧 Show Total Sentiment Pie Chart")
 
-if __name__ == "__main__":
-    main()
+        if ("show_trend" not in st.session_state) and ("show_pie" not in st.session_state):
+            st.session_state.show_trend = True
+            st.session_state.show_pie = False
+        if show_trend:
+            st.session_state.show_trend = True
+            st.session_state.show_pie = False
+        if show_pie:
+            st.session_state.show_trend = False
+            st.session_state.show_pie = True
+
+        if st.session_state.show_trend:
+            st.markdown("## 📈 Sentiment Trends Over Time")
+            fig_line = px.line(trend_df, x="date", y="count", color="sentiment", markers=True,
+                               title="Sentiment Counts by Day",
+                               labels={"count": "Feedback Count", "date": "Date"},
+                               hover_data={"count": True, "sentiment": True, "date": True})
+            fig_line.update_layout(hovermode="x unified")
+            fig_line.update_traces(mode="lines+markers")
+            st.plotly_chart(fig_line, use_container_width=True)
+
+        elif st.session_state.show_pie:
+            total_counts = filtered_df['sentiment'].value_counts().reset_index()
+            total_counts.columns = ['sentiment', 'count']
+
+            st.markdown("## 🥧 Total Sentiment Distribution")
+            fig_pie = px.pie(total_counts, values='count', names='sentiment',
+                             title="Overall Sentiment Distribution in Selected Period",
+                             color='sentiment',
+                             color_discrete_map={
+                                 "Very Positive": "green",
+                                 "Positive": "lightgreen",
+                                 "Neutral": "gray",
+                                 "Negative": "orange",
+                                 "Very Negative": "red"
+                             })
+            fig_pie.update_traces(textposition='inside', textinfo='percent+label')
+            st.plotly_chart(fig_pie, use_container_width=True)
+
+        # Generate Summary button & display summary
+
+                # ---- Category Filter Section ----
+        st.markdown("### 📂 Select Feedback Category")
+
+        categories = ["Food Quality", "Pricing", "Cleanliness", "Delivery", "Other"]
+
+        if "selected_category" not in st.session_state:
+            st.session_state.selected_category = None
+
+        col_cat = st.columns(len(categories))
+        for idx, cat in enumerate(categories):
+            if col_cat[idx].button(cat):
+                if st.session_state.selected_category == cat:
+                    st.session_state.selected_category = None  # unselect if same clicked
+                else:
+                    st.session_state.selected_category = cat
+
+        # Show example feedback for selected category
+        if st.session_state.selected_category:
+            st.markdown(f"#### ✨ Example Feedback for **{st.session_state.selected_category}**")
+
+            # Ensure your dataset has a 'category' column, else you need logic to assign categories
+            if "category" in filtered_df.columns:
+                examples_df = filtered_df[filtered_df["category"] == st.session_state.selected_category]
+            else:
+                examples_df = pd.DataFrame(columns=df.columns)  # fallback empty
+
+            if not examples_df.empty:
+                sample_texts = examples_df["feedback"].dropna().sample(min(5, len(examples_df)), random_state=42)
+                for i, fb in enumerate(sample_texts, 1):
+                    st.markdown(f"**{i}.** {fb}")
+            else:
+                st.info("No feedback found for this category in the selected date range.")
+
+                
+
+        st.markdown(f"### 📝 Summary Report")
+
+        if st.button("📝 Generate Summary"):
+            with st.spinner("Generating summary..."):
+                try:
+                    res = requests.post(
+                        "http://localhost:5000/generate_summary",
+                        json={
+                            "start_date": start_date.strftime("%Y-%m-%d"),
+                            "end_date": end_date.strftime("%Y-%m-%d")
+                        }
+                    )
+                    res_data = res.json()
+                    if "error" in res_data:
+                        st.error(f"❌ Error: {res_data['error']}")
+                    else:
+                        st.markdown(f"#### Customer Sentiment Summary Report: {start_date.strftime('%Y-%m-%d')} - {end_date.strftime('%Y-%m-%d')}")
+                        st.write(res_data.get("summary", "No summary generated."))
+                except Exception as e:
+                    st.error(f"❌ Failed to get summary: {e}")
