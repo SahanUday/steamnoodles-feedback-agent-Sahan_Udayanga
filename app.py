@@ -29,19 +29,13 @@ if page == "📨 Feedback Agent":
 
     if submitted and feedback:
         with st.spinner("Please wait...."):
-            try:
-                res = requests.post("http://localhost:5000/analyze_feedback", json={"feedback": feedback})
-                data = res.json()
-                if "reply" in data:
-                    st.success("✅ Feedback processed successfully!")
-                    st.markdown("### 💬 Auto-Generated Response")
-                    st.markdown(data['reply'].replace("\n", "  \n"))
-                elif "error" in data:
-                    st.error(f"❌ Request failed: {data['error']}")
-                else:
-                    st.error("❌ Unexpected response from server.")
-            except Exception as e:
-                st.error(f"❌ Request failed: {e}")
+         
+            res = requests.post("http://localhost:5000/analyze_feedback", json={"feedback": feedback})
+            data = res.json()
+            if "reply" in data:
+                st.success("✅ Feedback processed successfully!")
+                st.markdown("### 💬 Auto-Generated Response")
+                st.markdown(data['reply'].replace("\n", "  \n"))
 
 # ---- Agent 2: Sentiment Visualization ----
 elif page == "📊 Sentiment Dashboard":
@@ -128,7 +122,6 @@ elif page == "📊 Sentiment Dashboard":
 
         # Generate Summary button & display summary
 
-                # ---- Category Filter Section ----
         st.markdown("### 📂 Select Feedback Category")
 
         categories = ["Food Quality", "Pricing", "Cleanliness", "Delivery", "Other"]
@@ -161,25 +154,18 @@ elif page == "📊 Sentiment Dashboard":
             else:
                 st.info("No feedback found for this category in the selected date range.")
 
-                
-
         st.markdown(f"### 📝 Summary Report")
 
         if st.button("📝 Generate Summary"):
             with st.spinner("Generating summary..."):
-                try:
-                    res = requests.post(
-                        "http://localhost:5000/generate_summary",
-                        json={
-                            "start_date": start_date.strftime("%Y-%m-%d"),
-                            "end_date": end_date.strftime("%Y-%m-%d")
-                        }
-                    )
-                    res_data = res.json()
-                    if "error" in res_data:
-                        st.error(f"❌ Error: {res_data['error']}")
-                    else:
-                        st.markdown(f"#### Customer Sentiment Summary Report: {start_date.strftime('%Y-%m-%d')} - {end_date.strftime('%Y-%m-%d')}")
-                        st.write(res_data.get("summary", "No summary generated."))
-                except Exception as e:
-                    st.error(f"❌ Failed to get summary: {e}")
+           
+                res = requests.post(
+                    "http://localhost:5000/generate_summary",
+                    json={
+                        "start_date": start_date.strftime("%Y-%m-%d"),
+                        "end_date": end_date.strftime("%Y-%m-%d")
+                    }
+                )
+                res_data = res.json()
+                st.markdown(f"#### Customer Sentiment Summary Report: {start_date.strftime('%Y-%m-%d')} - {end_date.strftime('%Y-%m-%d')}")
+                st.write(res_data.get("summary", "No summary generated."))

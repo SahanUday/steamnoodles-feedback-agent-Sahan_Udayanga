@@ -10,32 +10,14 @@ app = Flask(__name__)
 api_key = os.getenv("GOOGLE_API_KEY")
 llm = GoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key)
 
-summary_prompt_template = """
-You are an expert customer feedback analyst. Given the counts of customer feedback sentiments in a selected period, write a concise, insightful summary report.
-
-Sentiment Counts:
-Very Positive: {very_positive}
-Positive: {positive}
-Neutral: {neutral}
-Negative: {negative}
-Very Negative: {very_negative}
-
-Summarize the overall customer sentiment trend, highlighting notable positives and areas needing urgent attention.
-"""
-
 @app.route("/generate_summary", methods=["POST"])
 def generate_summary():
     data = request.get_json()
     start_date_str = data.get("start_date")
     end_date_str = data.get("end_date")
-    if not start_date_str or not end_date_str:
-        return jsonify({"error": "start_date and end_date are required"}), 400
 
-    try:
-        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
-        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
-    except ValueError:
-        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD."}), 400
+    start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+    end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
 
     # Read CSV and filter by date
     if not os.path.isfile("steamnoodles_feedback_dataset.csv"):
@@ -61,7 +43,8 @@ def generate_summary():
     very_positive_text = "\n".join(very_positive_feedbacks[:5]) if very_positive_feedbacks else "None"
     very_negative_text = "\n".join(very_negative_feedbacks[:5]) if very_negative_feedbacks else "None"
 
-    prompt = f"""
+    # PROMPT : Generate summary
+    summary_prompt = f"""
 Your summary MUST mention both the very positive and very negative feedbacks, using provided counts and using the sample comments and counts to highlight key strengths and urgent issues. 
 Summarize the overall customer sentiment trend, notable positives, and areas needing immediate attention. Do not include any heading or title in your summary.
 Generate paragraphs that are coherent and contextually relevant, ensuring a smooth flow of ideas.
@@ -82,12 +65,9 @@ Sample Very Negative Feedbacks:
 
 Summarize the overall customer sentiment trend, highlighting notable positives and areas needing urgent attention. Use the sample feedbacks to provide concrete examples in your summary.
 """
-
-    try:
-        summary = llm.invoke(prompt).strip()
-        return jsonify({"summary": summary})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    
+    summary = llm.invoke(summary_prompt).strip()
+    return jsonify({"summary": summary})
 
 # PROMPT 1: Feedback analysis (analytics + category classification)
 analysis_prompt = PromptTemplate.from_template(
@@ -144,9 +124,7 @@ Reply:
 """
 )
 
-CSV_FILE = "steamnoodles_feedback_dataset.csv"
-
-def save_to_csv(feedback, sentiment, urgency, emotion, category, reply, filename=CSV_FILE):
+def save_to_csv(feedback, sentiment, urgency, emotion, category, reply, filename="steamnoodles_feedback_dataset.csv"):
     file_exists = os.path.isfile(filename)
     with open(filename, mode="a", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
@@ -161,32 +139,28 @@ def analyze_feedback():
     if not feedback:
         return jsonify({"error": "Feedback is required"}), 400
 
-    try:
-        analysis = llm.invoke(analysis_prompt.format(feedback=feedback)).strip()
-        sentiment = analysis.split("Sentiment:")[1].split("\n")[0].strip()
-        urgency = analysis.split("Urgency:")[1].split("\n")[0].strip()
-        emotion = analysis.split("Emotion:")[1].split("\n")[0].strip()
-        category = analysis.split("Category:")[1].strip()
+    analysis = llm.invoke(analysis_prompt.format(feedback=feedback)).strip()
+    sentiment = analysis.split("Sentiment:")[1].split("\n")[0].strip()
+    urgency = analysis.split("Urgency:")[1].split("\n")[0].strip()
+    emotion = analysis.split("Emotion:")[1].split("\n")[0].strip()
+    category = analysis.split("Category:")[1].strip()
 
-        response = llm.invoke(response_prompt.format(
-            feedback=feedback,
-            sentiment=sentiment,
-            urgency=urgency,
-            emotion=emotion
-        )).strip()
+    response = llm.invoke(response_prompt.format(
+        feedback=feedback,
+        sentiment=sentiment,
+        urgency=urgency,
+        emotion=emotion
+    )).strip()
 
-        save_to_csv(feedback, sentiment, urgency, emotion, category, response)
+    save_to_csv(feedback, sentiment, urgency, emotion, category, response)
 
-        return jsonify({
-            "sentiment": sentiment,
-            "urgency": urgency,
-            "emotion": emotion,
-            "category": category,
-            "reply": response
-        })
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    return jsonify({
+        "sentiment": sentiment,
+        "urgency": urgency,
+        "emotion": emotion,
+        "category": category,
+        "reply": response
+    })
 
 if __name__ == "__main__":
     app.run(port=5000)
