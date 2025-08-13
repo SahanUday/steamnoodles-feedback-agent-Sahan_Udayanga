@@ -138,15 +138,6 @@ Users can filter feedback by business categories like Food Quality, Pricing, and
 
 The system can generate comprehensive summaries of customer sentiment for any selected time period, highlighting key trends, successes, and areas for improvement.
 
-## 🎯 Evaluation Criteria
-
-| Criteria | Weight | Description |
-|----------|--------|-------------|
-| Functionality of both agents | 40% | Both the Feedback Analysis Agent and Sentiment Dashboard Agent function as intended, providing accurate analysis, responses, and visualizations |
-| Use of LLMs + Sentiment logic | 25% | Effective implementation of Google's Gemini model for sentiment analysis, classification, and response generation with appropriate prompting strategies |
-| Code quality & documentation | 20% | Clean, modular code with proper error handling, comments, and comprehensive documentation |
-| Innovation & improvements | 15% | Added features like multilingual support, detailed categorization, and comprehensive visualization options |
-
 ## 🎬 Demo Video
 [INSERT LINK TO DEMO VIDEO]
 
