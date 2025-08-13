@@ -256,8 +256,5 @@ This feature allows management to focus on specific aspects of the business that
 
 The system can generate comprehensive summaries of customer sentiment for any selected time period, highlighting key trends, successes, and areas for improvement.
 
-## 🎬 Demo Video
-[SteamNoodles Feedback Agent System Demo](./assets/Turn%20on%20blue%20LED.mp4)
-
 ## 📄 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
