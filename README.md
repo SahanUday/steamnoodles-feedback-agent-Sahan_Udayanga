@@ -1,16 +1,27 @@
 # SteamNoodles Feedback Agent System
+An AI-powered customer feedback analysis system for SteamNoodles restaurant chain that provides real-time sentiment analysis, automated response generation, and comprehensive dashboard analytics.
 
 ## 📝 Developer Information
 - **Name:** Sahan Udayanga
 - **University:** University of Moratuwa
-- **Year:** 2025
+- **Year:** 3rd year
 
 ## 🍜 Project Overview
 This project consists of two intelligent agents for SteamNoodles restaurant chain:
 
-1. **Feedback Analysis Agent:** Processes and responds to customer feedback with human-like, context-aware responses in multiple languages (English, Sinhala, Tamil).
+1. **Feedback Analysis Agent:**
+   - Processes and responds to customer feedback with human-like, context-aware responses in multiple languages (English, Sinhala, Singlish, Tamil)
+   - Multi-language Support: Analyzes feedback in English, Sinhala, and Tamil
+   - Intelligent Analysis: Provides sentiment, urgency level, emotion detection, and business category classification
+   - Automated Responses: Generates human-like, contextually appropriate replies in the same language as the feedback
+   - Real-time Processing: Instant feedback analysis and response generation
 
-2. **Sentiment Dashboard Agent:** Visualizes sentiment trends over time and generates analytical summaries of customer feedback.
+2. **Sentiment Dashboard Agent:**
+   - Visualizes sentiment trends over time and generates analytical summaries of customer feedback
+   - Interactive Visualizations: Trend plots and pie charts for sentiment distribution
+   - Flexible Time Ranges: Last 7 days, 30 days, or custom date ranges
+   - Category Filtering: Filter feedback by business categories (Food Quality, Pricing, Cleanliness, Delivery, Other)
+   - AI-Generated Summary Reports: Comprehensive sentiment analysis reports with insights
 
 The system leverages Google's Gemini model to analyze customer feedback, classify sentiment, determine urgency, identify emotions, and categorize feedback into business areas.
 
@@ -25,11 +36,55 @@ My approach focused on creating a multi-functional feedback management system th
 
 The architecture uses Flask for the backend API services and Streamlit for the interactive frontend dashboard.
 
+### System Architecture
+```mermaid
+graph TD
+    A[Streamlit Frontend] <--> B[Flask API Backend]
+    B <--> C[Google Gemini AI Model]
+    A --> D[Dashboard Visualizations]
+    B --> E[CSV Storage - Feedback Dataset]
+    style A fill:#97CBFF,stroke:#333,stroke-width:2px
+    style B fill:#FFA69E,stroke:#333,stroke-width:2px
+    style C fill:#B8F2E6,stroke:#333,stroke-width:2px
+    style D fill:#AED9E0,stroke:#333,stroke-width:2px
+    style E fill:#FAF3DD,stroke:#333,stroke-width:2px
+```
+
+### Key Components
+
+**Feedback Analysis**
+- Sentiment Classification: Very Negative, Negative, Neutral, Positive, Very Positive
+- Urgency Assessment: Low, Medium, High
+- Emotion Detection: Anger, joy, frustration, gratitude, disappointment, etc.
+- Category Classification: Food Quality, Delivery, Customer Service, Pricing, Cleanliness, Take away, Waiting Time, Other
+
+**Multi-language Support**
+- Automatically detects input language
+- Generates responses in the same language as the feedback
+- Supports Sinhala, Tamil, and English
+- Handles transliterated text (Singlish/Tanglish)
+
+**Dashboard Features**
+- Real-time sentiment trend visualization
+- Interactive pie charts for sentiment distribution
+- Category-based feedback filtering
+- Date range selection
+- AI-generated summary reports
+
+**Data Schema**
+CSV Structure:
+```
+timestamp,feedback,sentiment,urgency,emotion,category
+2024-01-01T10:30:00,Great food!,Very Positive,Low,joy,Food Quality
+```
+
 ## 🔧 Setup Instructions
 
 ### Prerequisites
 - Python 3.10 or higher
 - Git
+- Google Gemini API key
+- Required Python packages (see requirements.txt)
 
 ### Installation Steps
 1. Clone the repository:
@@ -85,25 +140,35 @@ The architecture uses Flask for the backend API services and Streamlit for the i
 ```
 The food was excellent but the waiting time was too long. I had to wait for 30 minutes for my order.
 ```
+
 **Expected Output:**
+![Sample Feedback 1](./assets/sample_feedback_1.jpg)
+
+The Feedback Agent analyzes the input and determines:
 - Sentiment: Neutral
 - Urgency: Medium
 - Emotion: Frustration
 - Category: Waiting Time
-- Response: Thank you for your feedback! We're thrilled you enjoyed our food, but we're sorry about the long wait time. We're working to improve our service speed, and your patience is appreciated. We hope to serve you more efficiently on your next visit! 😊
+
+It then generates a context-aware response that acknowledges both the positive feedback about the food and addresses the concern about waiting time.
 
 **Sample Feedback 2 (Sinhala):**
 ```
 ආහාරය සුපිරියි! අතිශයින් සතුටුයි!
 ```
+
 **Expected Output:**
-- Sentiment: Very Positive
-- Urgency: Low
-- Emotion: Joy
-- Category: Food Quality
-- Response: ඔබගේ ප්‍රශංසාත්මක ප්‍රතිචාරයට බොහොම ස්තුතියි! අපගේ ආහාර ගැන ඔබ සතුටු වී සිටින බව දැනගැනීමට ලැබීම අපට ඉතා සතුටක්. නැවත වරක් ඔබව සාදරයෙන් පිළිගන්නට බලාපොරොත්තු වෙනවා! 😊
+![Sample Feedback 2](./assets/sample_feedback_2.jpg)
+
+For Sinhala feedback, the system correctly:
+- Identifies the language
+- Analyzes sentiment (Very Positive)
+- Determines urgency (Low) and emotion (Joy)
+- Categorizes appropriately (Food Quality)
+- Responds in fluent Sinhala with appropriate cultural context
 
 ### Testing the Sentiment Dashboard
+
 1. Navigate to the "📊 Sentiment Dashboard" page using the sidebar
 2. Select a time range (Last 7 Days, Last 30 Days, or Custom Range)
 3. View the sentiment trend visualization
@@ -113,30 +178,51 @@ The food was excellent but the waiting time was too long. I had to wait for 30 m
 
 ## 📊 Demo Output
 
-### Feedback Analysis and Auto-Response Generation
-[INSERT SCREENSHOT: Feedback agent analyzing a customer comment and generating a response]
+### Time Period Selection
+![Time Range Selection](./assets/time_range_selecting.jpg)
 
-The Feedback Agent analyzes customer input, determining sentiment, urgency, dominant emotion, and business category. It then generates a natural, context-aware response that matches the language and tone of the original feedback.
+The dashboard allows users to select different time ranges for analysis:
+- Last 7 Days: Shows the most recent week of feedback
+- Last 30 Days: Displays a monthly trend
+- Custom Range: Enables selection of specific start and end dates for detailed analysis
 
-### Sentiment Trend Visualization
-[INSERT SCREENSHOT: Line chart showing sentiment trends over time]
+This flexible time selection helps managers track sentiment changes over different periods and identify patterns or anomalies.
 
-The Sentiment Dashboard displays trends of different sentiment categories over the selected time period, allowing managers to identify patterns and changes in customer satisfaction.
+### Data Visualization
 
-### Sentiment Distribution Pie Chart
-[INSERT SCREENSHOT: Pie chart showing distribution of sentiment categories]
+**Sentiment Trend Visualization**
+![Trend Chart](./assets/trend_chart.jpg)
 
-This visualization shows the overall distribution of sentiment categories within the selected time range, providing an at-a-glance view of customer satisfaction levels.
+The line chart shows how different sentiment categories (Very Positive, Positive, Neutral, Negative, Very Negative) change over time. This visualization helps identify:
+- Overall sentiment trends
+- Specific days with unusual feedback patterns
+- The effectiveness of new initiatives or changes in service
+
+**Sentiment Distribution Pie Chart**
+![Pie Chart](./assets/pie_chart.jpg)
+
+The pie chart provides an at-a-glance view of the overall sentiment distribution within the selected time period. It shows the proportion of each sentiment category, making it easy to understand the general customer satisfaction level.
 
 ### Feedback Category Selection
-[INSERT SCREENSHOT: Category filter buttons and example feedback]
+![Feedback Categories](./assets/feedback_category.jpg)
 
-Users can filter feedback by business categories like Food Quality, Pricing, and Delivery to focus on specific aspects of the business that may need attention.
+Users can filter feedback by business categories:
+- Food Quality
+- Pricing
+- Cleanliness
+- Delivery
+- Other
+
+This feature allows management to focus on specific aspects of the business that may need attention. When a category is selected, the system displays example feedback from that category based on the data in the CSV file.
 
 ### Summary Report Generation
-[INSERT SCREENSHOT: AI-generated summary report]
+![Report Summary](./assets/report_summary.jpg)
 
-The system can generate comprehensive summaries of customer sentiment for any selected time period, highlighting key trends, successes, and areas for improvement.
+The system can generate comprehensive summaries of customer sentiment for any selected time period. These AI-generated reports:
+- Highlight key trends in customer sentiment
+- Identify strengths and areas for improvement
+- Provide actionable insights based on the feedback data
+- Summarize the overall customer experience during the selected period
 
 ## 🎯 Evaluation Criteria
 
@@ -148,7 +234,7 @@ The system can generate comprehensive summaries of customer sentiment for any se
 | Innovation & improvements | 15% | Added features like multilingual support, detailed categorization, and comprehensive visualization options |
 
 ## 🎬 Demo Video
-[INSERT LINK TO DEMO VIDEO]
+[SteamNoodles Feedback Agent System Demo](./assets/Turn%20on%20blue%20LED.mp4)
 
 ## 📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
