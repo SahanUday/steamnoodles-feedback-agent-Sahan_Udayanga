@@ -3,7 +3,7 @@
 ## 📝 Developer Information
 - **Name:** Sahan Udayanga
 - **University:** University of Moratuwa
-- **Year:** 2025
+- **Year:** 3rd year
 
 ## 🍜 Project Overview
 This project consists of two intelligent agents for SteamNoodles restaurant chain:
