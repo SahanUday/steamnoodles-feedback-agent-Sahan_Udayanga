@@ -142,4 +142,4 @@ The system can generate comprehensive summaries of customer sentiment for any se
 [INSERT LINK TO DEMO VIDEO]
 
 ## 📄 License
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
