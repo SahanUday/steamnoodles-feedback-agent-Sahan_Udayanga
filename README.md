@@ -218,11 +218,7 @@ This feature allows management to focus on specific aspects of the business that
 ### Summary Report Generation
 ![Report Summary](./assets/report_summary.jpg)
 
-The system can generate comprehensive summaries of customer sentiment for any selected time period. These AI-generated reports:
-- Highlight key trends in customer sentiment
-- Identify strengths and areas for improvement
-- Provide actionable insights based on the feedback data
-- Summarize the overall customer experience during the selected period
+The system can generate comprehensive summaries of customer sentiment for any selected time period, highlighting key trends, successes, and areas for improvement.
 
 ## 🎯 Evaluation Criteria
 
@@ -237,4 +233,4 @@ The system can generate comprehensive summaries of customer sentiment for any se
 [SteamNoodles Feedback Agent System Demo](./assets/Turn%20on%20blue%20LED.mp4)
 
 ## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see the LICENSE file for details.
