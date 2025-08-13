@@ -36,7 +36,7 @@ My approach focused on creating a multi-functional feedback management system th
 
 The architecture uses Flask for the backend API services and Streamlit for the interactive frontend dashboard.
 
-### System Architecture
+### High-Level System Architecture
 ```mermaid
 graph TD
     A[Streamlit Frontend] <--> B[Flask API Backend]
@@ -134,47 +134,81 @@ timestamp,feedback,sentiment,urgency,emotion,category
 3. Click "Submit"
 4. View the analyzed sentiment, urgency, emotion, category, and AI-generated response
 
-#### Sample Prompts and Expected Outputs:
+### Testing the Sentiment Dashboard
+1. Navigate to the "📊 Sentiment Dashboard" page using the sidebar
+2. Select a time range (Last 7 Days, Last 30 Days, or Custom Range)
+3. View the sentiment trend visualization
+4. Switch between trend plots and pie charts
+5. Filter by feedback category to see specific feedback examples
+6. Generate AI-powered summary reports
 
-**Sample Feedback 1 (English):**
+## 📊 Features and Demo Output
+
+### Feedback Analysis Agent
+![Sample Feedback 1](./assets/sample_feedback_1.jpg)
+
+The Feedback Analysis Agent is a sophisticated AI-powered tool that:
+- Analyzes customer feedback in multiple languages (English, Sinhala, Tamil)
+- Determines sentiment classification (Very Positive to Very Negative)
+- Assesses urgency level (Low, Medium, High)
+- Identifies dominant customer emotions
+- Categorizes feedback by business area
+- Generates human-like, contextually appropriate responses in the same language as the original feedback
+
+**Process Flow:**
+1. Customer submits feedback through the interface
+2. Gemini AI model processes the input text
+3. Analysis results are displayed (sentiment, urgency, emotion, category)
+4. An appropriate response is automatically generated
+5. Results are saved to the CSV database for future analysis
+
+**Multilingual Capabilities:**
+The agent handles various languages and writing styles:
+- English text is processed and responded to in English
+- Sinhala text (ආහාරය සුපිරියි!) receives Sinhala responses
+- Tamil text (உணவு அருமை!) receives Tamil responses
+- Transliterated text (Singlish/Tanglish) is properly interpreted
+
+**Sample Outputs:**
+
+**English Feedback:**
 ```
 The food was excellent but the waiting time was too long. I had to wait for 30 minutes for my order.
 ```
-
-**Expected Output:**
 ![Sample Feedback 1](./assets/sample_feedback_1.jpg)
 
-The Feedback Agent analyzes the input and determines:
-- Sentiment: Neutral
-- Urgency: Medium
-- Emotion: Frustration
-- Category: Waiting Time
+The analysis correctly identifies:
+- Sentiment: Neutral (balancing positive food experience with negative waiting time)
+- Urgency: Medium (indicates attention needed but not critical)
+- Emotion: Frustration (captures the customer's emotional state)
+- Category: Waiting Time (correctly categorizes the primary concern)
 
-It then generates a context-aware response that acknowledges both the positive feedback about the food and addresses the concern about waiting time.
+The response acknowledges both the positive food experience and addresses the waiting time concern with an apologetic tone and assurance of improvement.
 
-**Sample Feedback 2 (Sinhala):**
+**Sinhala Feedback:**
 ```
 ආහාරය සුපිරියි! අතිශයින් සතුටුයි!
 ```
-
-**Expected Output:**
 ![Sample Feedback 2](./assets/sample_feedback_2.jpg)
 
-For Sinhala feedback, the system correctly:
+For Sinhala feedback, the system accurately:
 - Identifies the language
-- Analyzes sentiment (Very Positive)
-- Determines urgency (Low) and emotion (Joy)
-- Categorizes appropriately (Food Quality)
-- Responds in fluent Sinhala with appropriate cultural context
+- Analyzes sentiment as Very Positive
+- Assigns Low urgency (no action needed)
+- Detects Joy as the primary emotion
+- Categorizes as Food Quality
+- Responds in fluent Sinhala with culturally appropriate phrasing
 
 ### Testing the Sentiment Dashboard
+
+The Sentiment Dashboard Agent provides comprehensive visualization and analysis tools:
 
 1. Navigate to the "📊 Sentiment Dashboard" page using the sidebar
 2. Select a time range (Last 7 Days, Last 30 Days, or Custom Range)
 3. View the sentiment trend visualization
-4. Click between "Show Trend Plot" and "Show Total Sentiment Pie Chart" to switch visualizations
+4. Switch between trend plots and pie charts
 5. Filter by feedback category to see specific feedback examples
-6. Click "Generate Summary" to get an AI-generated analysis of the selected period
+6. Generate AI-powered summary reports
 
 ## 📊 Demo Output
 
